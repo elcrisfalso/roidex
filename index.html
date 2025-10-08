@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página no encontrada</title>
+    <style>
+        body {
+            font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
+            background-color: #008080;
+            margin: 0;
+            padding: 20px;
+            color: #000000;
+        }
+        
+        .window {
+            background-color: #c0c0c0;
+            border: 2px outset;
+            padding: 0;
+            margin: 50px auto;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+        }
+        
+        .title-bar {
+            background: linear-gradient(90deg, #000080, #1084d0);
+            color: white;
+            padding: 3px 5px;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .button {
+            width: 16px;
+            height: 14px;
+            background-color: #c0c0c0;
+            border: 1px outset;
+            font-size: 8px;
+            text-align: center;
+            line-height: 12px;
+            cursor: pointer;
+        }
+        
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ff0000;
+        }
+        
+        h1 {
+            font-size: 24px;
+            margin: 10px 0;
+            color: #000080;
+        }
+        
+        p {
+            font-size: 14px;
+            margin: 10px 0;
+            line-height: 1.4;
+        }
+        
+        .button-large {
+            background-color: #c0c0c0;
+            border: 2px outset;
+            padding: 5px 15px;
+            margin: 10px;
+            cursor: pointer;
+            font-family: "MS Sans Serif";
+            font-size: 12px;
+        }
+        
+        .button-large:active {
+            border: 2px inset;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        /* Efecto de parpadeo para el texto */
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">
+            <span>Microsoft Internet Explorer</span>
+            <div class="buttons">
+                <div class="button">_</div>
+                <div class="button">□</div>
+                <div class="button">×</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="error-icon">⚠️</div>
+            <h1>Esta página web no está disponible</h1>
+            
+            <p><strong>Error 404 - Archivo no encontrado</strong></p>
+            
+            <p>Internet Explorer no puede abrir la página web solicitada.</p>
+            
+            <p>Las posibles causas son:
+            <br>• Algún error de escritura en la dirección
+            <br>• Un marcador no actualizado
+            <br>• Un motor de búsqueda con un listado desactualizado
+            <br>• ¡O quizás solo estás probando este efecto! 😉</p>
+            
+            <button class="button-large" onclick="window.location.href='https://roidex.netlify.app'">
+                Reintentar
+            </button>
+            
+            <button class="button-large" onclick="showRealSite()">
+                Más información
+            </button>
+            
+            <div class="footer">
+                Microsoft Windows © 1998 Microsoft Corporation. Todos los derechos reservados.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showRealSite() {
+            // Aquí puedes redirigir a tu contenido real después de 3 segundos
+            document.body.innerHTML = `
+                <div style="text-align: center; padding: 100px; font-family: Arial;">
+                    <h1>¡Bienvenido a mi sitio real!</h1>
+                    <p>Cargando contenido...</p>
+                    <div style="margin: 20px;">
+                        <div style="width: 100%; height: 20px; background: #f0f0f0; border: 1px solid #ccc;">
+                            <div id="progressBar" style="width: 0%; height: 100%; background: #008080; transition: width 2s;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                document.getElementById('progressBar').style.width = '100%';
+            }, 100);
+            
+            // Después de 3 segundos, muestra tu contenido real
+            setTimeout(() => {
+                // Aquí va el contenido real de tu página
+                document.body.innerHTML = `
+                    <div style="text-align: center; padding: 50px; font-family: Arial;">
+                        <h1>¡Bienvenido a mi sitio personal!</h1>
+                        <p>Este es el contenido real de mi página.</p>
+                        <p>Puedes personalizar esto con tu información real.</p>
+                        <a href="#" onclick="location.reload()">← Volver al efecto 404</a>
+                    </div>
+                `;
+            }, 3000);
+        }
+        
+        // Efecto de sonido opcional (descomenta si quieres)
+        /*
+        window.addEventListener('click', function() {
+            const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
+            audio.play().catch(e => console.log('Audio no permitido'));
+        });
+        */
+    </script>
+</body>
+</html>
