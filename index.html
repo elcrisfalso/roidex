@@ -3,186 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página no encontrada</title>
+    <title>Deltarune Style Game</title>
     <style>
-        body {
-            font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif;
-            background-color: #008080;
+        * {
             margin: 0;
-            padding: 20px;
-            color: #000000;
-        }
-        
-        .window {
-            background-color: #c0c0c0;
-            border: 2px outset;
             padding: 0;
-            margin: 50px auto;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+            box-sizing: border-box;
         }
         
-        .title-bar {
-            background: linear-gradient(90deg, #000080, #1084d0);
-            color: white;
-            padding: 3px 5px;
-            font-weight: bold;
-            font-size: 13px;
+        body {
+            background: #1a1a2e;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
         }
         
-        .buttons {
-            display: flex;
-            gap: 2px;
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            border: 4px solid #4a4a6a;
+            border-radius: 8px;
+            overflow: hidden;
         }
         
-        .button {
-            width: 16px;
-            height: 14px;
-            background-color: #c0c0c0;
-            border: 1px outset;
-            font-size: 8px;
-            text-align: center;
-            line-height: 12px;
-            cursor: pointer;
+        #gameCanvas {
+            background: #2d2d44;
+            display: block;
         }
         
-        .content {
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #ff0000;
-        }
-        
-        h1 {
-            font-size: 24px;
-            margin: 10px 0;
-            color: #000080;
-        }
-        
-        p {
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
             font-size: 14px;
-            margin: 10px 0;
+        }
+        
+        #dialogueBox {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border: 2px solid #4a4a6a;
+            border-radius: 8px;
+            display: none;
+            font-size: 14px;
             line-height: 1.4;
         }
         
-        .button-large {
-            background-color: #c0c0c0;
-            border: 2px outset;
-            padding: 5px 15px;
-            margin: 10px;
-            cursor: pointer;
-            font-family: "MS Sans Serif";
+        #controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
             font-size: 12px;
         }
         
-        .button-large:active {
-            border: 2px inset;
+        .npc-name {
+            color: #ff6b6b;
+            font-weight: bold;
         }
         
-        .footer {
-            margin-top: 20px;
-            font-size: 11px;
-            color: #666;
-        }
-        
-        /* Efecto de parpadeo para el texto */
-        .blink {
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+        .object-name {
+            color: #4ecdc4;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="window">
-        <div class="title-bar">
-            <span>Microsoft Internet Explorer</span>
-            <div class="buttons">
-                <div class="button">_</div>
-                <div class="button">□</div>
-                <div class="button">×</div>
-            </div>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="hud">
+            <div>Posición: <span id="playerPos">0,0</span></div>
+            <div>Interactuar: Espacio</div>
         </div>
         
-        <div class="content">
-            <div class="error-icon">⚠️</div>
-            <h1>Esta página web no está disponible</h1>
-            
-            <p><strong>Error 404 - Archivo no encontrado</strong></p>
-            
-            <p>Internet Explorer no puede abrir la página web solicitada.</p>
-            
-            <p>Las posibles causas son:
-            <br>• Algún error de escritura en la dirección
-            <br>• Un marcador no actualizado
-            <br>• Un motor de búsqueda con un listado desactualizado
-            <br>• ¡O quizás solo estás probando este efecto! 😉</p>
-            
-            <button class="button-large" onclick="window.location.href='https://roidex.netlify.app'">
-                Reintentar
-            </button>
-            
-            <button class="button-large" onclick="showRealSite()">
-                Más información
-            </button>
-            
-            <div class="footer">
-                Microsoft Windows © 1998 Microsoft Corporation. Todos los derechos reservados.
-            </div>
+        <div id="controls">
+            Movimiento: WASD o Flechas
+        </div>
+        
+        <div id="dialogueBox">
+            <span id="dialogueText"></span>
         </div>
     </div>
 
     <script>
-        function showRealSite() {
-            // Aquí puedes redirigir a tu contenido real después de 3 segundos
-            document.body.innerHTML = `
-                <div style="text-align: center; padding: 100px; font-family: Arial;">
-                    <h1>¡Bienvenido a mi sitio real!</h1>
-                    <p>Cargando contenido...</p>
-                    <div style="margin: 20px;">
-                        <div style="width: 100%; height: 20px; background: #f0f0f0; border: 1px solid #ccc;">
-                            <div id="progressBar" style="width: 0%; height: 100%; background: #008080; transition: width 2s;"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
+        // Configuración del juego
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const dialogueBox = document.getElementById('dialogueBox');
+        const dialogueText = document.getElementById('dialogueText');
+        const playerPos = document.getElementById('playerPos');
+
+        // Jugador
+        const player = {
+            x: 400,
+            y: 300,
+            width: 20,
+            height: 30,
+            speed: 3,
+            color: '#ff6b6b',
+            direction: 'down'
+        };
+
+        // NPCs
+        const npcs = [
+            {
+                x: 200,
+                y: 200,
+                width: 20,
+                height: 30,
+                color: '#4ecdc4',
+                name: 'Sans',
+                dialogues: [
+                    "¡Hola! ¿Cómo estás?",
+                    "Este lugar es bastante interesante, ¿no crees?",
+                    "Tengo un presentimiento sobre ti..."
+                ]
+            },
+            {
+                x: 600,
+                y: 400,
+                width: 20,
+                height: 30,
+                color: '#ffe66d',
+                name: 'Toriel',
+                dialogues: [
+                    "Bienvenido, pequeño.",
+                    "Ten cuidado por ahí afuera.",
+                    "¿Te gustaría una tarta de caracol?"
+                ]
+            },
+            {
+                x: 300,
+                y: 500,
+                width: 20,
+                height: 30,
+                color: '#95e1d3',
+                name: 'Ralsei',
+                dialogues: [
+                    "¡Hola! Soy Ralsei.",
+                    "Todos los seres de luz son bienvenidos aquí.",
+                    "Juntos podemos salvar el mundo."
+                ]
+            }
+        ];
+
+        // Objetos interactivos
+        const objects = [
+            {
+                x: 500,
+                y: 150,
+                width: 30,
+                height: 30,
+                color: '#ff9a76',
+                type: 'chest',
+                name: 'Cofre',
+                message: "Encontraste un cofre misterioso. ¡Contiene 50 monedas!"
+            },
+            {
+                x: 100,
+                y: 400,
+                width: 40,
+                height: 20,
+                color: '#a29bfe',
+                type: 'sign',
+                name: 'Letrero',
+                message: "Bienvenido al Pueblo de la Luz. ¡Ten cuidado con los NPCs!"
+            },
+            {
+                x: 700,
+                y: 250,
+                width: 25,
+                height: 25,
+                color: '#fd79a8',
+                type: 'flower',
+                name: 'Flor Mágica',
+                message: "Esta flor brilla con energía mágica. Huele muy bien."
+            }
+        ];
+
+        // Controles
+        const keys = {};
+        let currentDialogue = null;
+        let dialogueIndex = 0;
+
+        // Event listeners para teclado
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
             
-            setTimeout(() => {
-                document.getElementById('progressBar').style.width = '100%';
-            }, 100);
-            
-            // Después de 3 segundos, muestra tu contenido real
-            setTimeout(() => {
-                // Aquí va el contenido real de tu página
-                document.body.innerHTML = `
-                    <div style="text-align: center; padding: 50px; font-family: Arial;">
-                        <h1>¡Bienvenido a mi sitio personal!</h1>
-                        <p>Este es el contenido real de mi página.</p>
-                        <p>Puedes personalizar esto con tu información real.</p>
-                        <a href="#" onclick="location.reload()">← Volver al efecto 404</a>
-                    </div>
-                `;
-            }, 3000);
-        }
-        
-        // Efecto de sonido opcional (descomenta si quieres)
-        /*
-        window.addEventListener('click', function() {
-            const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
-            audio.play().catch(e => console.log('Audio no permitido'));
+            if (e.key === ' ' && dialogueBox.style.display === 'block') {
+                e.preventDefault();
+                nextDialogue();
+            }
         });
-        */
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Detección de colisiones
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        // Mostrar diálogo
+        function showDialogue(text, name = null) {
+            if (name) {
+                dialogueText.innerHTML = `<span class="npc-name">${name}:</span> ${text}`;
+            } else {
+                dialogueText.innerHTML = text;
+            }
+            dialogueBox.style.display = 'block';
+            currentDialogue = { text, name };
+        }
+
+        function nextDialogue() {
+            dialogueIndex++;
+            if (currentDialogue && currentDialogue.dialogues && dialogueIndex < currentDialogue.dialogues.length) {
+                showDialogue(currentDialogue.dialogues[dialogueIndex], currentDialogue.name);
+            } else {
+                dialogueBox.style.display = 'none';
+                dialogueIndex = 0;
+                currentDialogue = null;
+            }
+        }
+
+        // Interactuar con objetos/NPCs
+        function interact() {
+            // Verificar NPCs cercanos
+            for (let npc of npcs) {
+                const interactionRange = 50;
+                const distance = Math.sqrt((player.x - npc.x) ** 2 + (player.y - npc.y) ** 2);
+                
+                if (distance < interactionRange) {
+                    const randomDialogue = npc.dialogues[Math.floor(Math.random() * npc.dialogues.length)];
+                    showDialogue(randomDialogue, npc.name);
+                    currentDialogue = npc;
+                    return;
+                }
+            }
+
+            // Verificar objetos cercanos
+            for (let obj of objects) {
+                const interactionRange = 50;
+                const distance = Math.sqrt((player.x - obj.x) ** 2 + (player.y - obj.y) ** 2);
+                
+                if (distance < interactionRange) {
+                    showDialogue(obj.message);
+                    return;
+                }
+            }
+        }
+
+        // Actualizar posición del jugador
+        function updatePlayer() {
+            let newX = player.x;
+            let newY = player.y;
+
+            // Movimiento
+            if (keys['w'] || keys['arrowup']) {
+                newY -= player.speed;
+                player.direction = 'up';
+            }
+            if (keys['s'] || keys['arrowdown']) {
+                newY += player.speed;
+                player.direction = 'down';
+            }
+            if (keys['a'] || keys['arrowleft']) {
+                newX -= player.speed;
+                player.direction = 'left';
+            }
+            if (keys['d'] || keys['arrowright']) {
+                newX += player.speed;
+                player.direction = 'right';
+            }
+
+            // Interacción
+            if (keys[' '] && dialogueBox.style.display !== 'block') {
+                interact();
+                keys[' '] = false; // Prevenir múltiples interacciones
+            }
+
+            // Limites del canvas
+            if (newX >= 0 && newX <= canvas.width - player.width) {
+                player.x = newX;
+            }
+            if (newY >= 0 && newY <= canvas.height - player.height) {
+                player.y = newY;
+            }
+
+            // Actualizar HUD
+            playerPos.textContent = `${Math.floor(player.x)},${Math.floor(player.y)}`;
+        }
+
+        // Dibujar elementos
+        function draw() {
+            // Limpiar canvas
+            ctx.fillStyle = '#2d2d44';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar patrón de fondo (cuadrícula)
+            ctx.strokeStyle = '#3a3a5a';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Dibujar objetos
+            objects.forEach(obj => {
+                ctx.fillStyle = obj.color;
+                if (obj.type === 'chest') {
+                    ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                    ctx.fillStyle = '#ffd166';
+                    ctx.fillRect(obj.x + 5, obj.y + 5, obj.width - 10, 8);
+                } else if (obj.type === 'sign') {
+                    ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(obj.x + 5, obj.y + 5, obj.width - 10, 3);
+                } else if (obj.type === 'flower') {
+                    ctx.beginPath();
+                    ctx.arc(obj.x + obj.width/2, obj.y + obj.height/2, obj.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Dibujar NPCs
+            npcs.forEach(npc => {
+                ctx.fillStyle = npc.color;
+                ctx.fillRect(npc.x, npc.y, npc.width, npc.height);
+                
+                // Ojos de los NPCs
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(npc.x + 5, npc.y + 8, 4, 4);
+                ctx.fillRect(npc.x + 11, npc.y + 8, 4, 4);
+            });
+
+            // Dibujar jugador
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Cara del jugador según dirección
+            ctx.fillStyle = '#ffffff';
+            if (player.direction === 'down') {
+                ctx.fillRect(player.x + 5, player.y + 10, 4, 4);
+                ctx.fillRect(player.x + 11, player.y + 10, 4, 4);
+            } else if (player.direction === 'up') {
+                ctx.fillRect(player.x + 5, player.y + 8, 4, 4);
+                ctx.fillRect(player.x + 11, player.y + 8, 4, 4);
+            } else if (player.direction === 'left') {
+                ctx.fillRect(player.x + 4, player.y + 10, 4, 4);
+                ctx.fillRect(player.x + 10, player.y + 10, 4, 4);
+            } else if (player.direction === 'right') {
+                ctx.fillRect(player.x + 6, player.y + 10, 4, 4);
+                ctx.fillRect(player.x + 12, player.y + 10, 4, 4);
+            }
+
+            // Dibujar área de interacción (debug)
+            if (keys['shift']) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(player.x + player.width/2, player.y + player.height/2, 50, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        // Bucle del juego
+        function gameLoop() {
+            updatePlayer();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Iniciar juego
+        gameLoop();
+
+        // Mensaje de bienvenida
+        setTimeout(() => {
+            showDialogue("¡Bienvenido! Usa WASD/flechas para moverte y ESPACIO para interactuar con NPCs y objetos.", "Sistema");
+        }, 1000);
     </script>
 </body>
 </html>
