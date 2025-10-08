@@ -3,829 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deltarune Style Game</title>
+    <title>Mi Juego 3D - Roblox Style</title>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: #1a1a2e;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Courier New', monospace;
             overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: white;
         }
         
         #gameContainer {
             position: relative;
-            width: 800px;
-            height: 600px;
-            border: 4px solid #4a4a6a;
-            border-radius: 8px;
-            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
         }
         
-        #gameCanvas {
-            background: #2d2d44;
-            display: block;
-        }
-        
-        #hud {
+        #ui {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        
-        #dialogueBox {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.7);
             padding: 15px;
-            border: 2px solid #4a4a6a;
-            border-radius: 8px;
-            display: none;
+            border-radius: 10px;
+            max-width: 300px;
+        }
+        
+        #ui h2 {
+            margin-top: 0;
+            color: #4db8ff;
+        }
+        
+        #instructions {
+            margin-top: 10px;
             font-size: 14px;
             line-height: 1.4;
         }
         
-        #battleScreen {
+        #loading {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000000;
-            display: none;
-            flex-direction: column;
-            color: white;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            z-index: 200;
         }
         
-        #battleUI {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            height: 150px;
-            border-top: 4px solid #4a4a6a;
-            background: #1a1a2e;
-        }
-        
-        #playerStats {
-            width: 200px;
-        }
-        
-        #enemyStats {
-            width: 200px;
-            text-align: right;
-        }
-        
-        #battleActions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 200px;
-        }
-        
-        .battle-button {
-            background: #4a4a6a;
-            color: white;
-            border: 2px outset #6a6a8a;
-            padding: 10px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .battle-button:hover {
-            background: #5a5a7a;
-        }
-        
-        .battle-button:active {
-            border: 2px inset #6a6a8a;
-        }
-        
-        #battleArea {
-            flex: 1;
-            position: relative;
-            background: #000000;
-            overflow: hidden;
-        }
-        
-        #battleText {
+        #crosshair {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-            border: 2px solid #4a4a6a;
-            border-radius: 5px;
-        }
-        
-        .heart {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background: #ff0000;
-            transform: rotate(45deg);
-        }
-        
-        .attack {
-            position: absolute;
-        }
-        
-        .sans-bone {
-            background: #ffffff;
-            width: 100px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
             height: 20px;
+            z-index: 100;
         }
         
-        .toriel-fire {
-            background: #ff6b6b;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-        }
-        
-        #controls {
+        #crosshair:before, #crosshair:after {
+            content: '';
             position: absolute;
-            top: 10px;
-            right: 10px;
+            background-color: white;
+        }
+        
+        #crosshair:before {
+            width: 2px;
+            height: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        #crosshair:after {
+            width: 20px;
+            height: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        button {
+            background-color: #4db8ff;
             color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
+            border: none;
+            padding: 10px 15px;
             border-radius: 5px;
-            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
         }
         
-        .npc-name {
-            color: #ff6b6b;
-            font-weight: bold;
-        }
-        
-        .object-name {
-            color: #4ecdc4;
-            font-weight: bold;
+        button:hover {
+            background-color: #3399cc;
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-        
-        <div id="hud">
-            <div>Posición: <span id="playerPos">0,0</span></div>
-            <div>Interactuar: Espacio</div>
-            <div>Estado: <span id="playerState">Parado</span></div>
-            <div>HP: <span id="playerHP">20/20</span></div>
-        </div>
-        
-        <div id="controls">
-            Movimiento: WASD o Flechas
-        </div>
-        
-        <div id="dialogueBox">
-            <span id="dialogueText"></span>
-        </div>
-        
-        <div id="battleScreen">
-            <div id="battleArea">
-                <div id="battleText">¡Apareció un enemigo!</div>
+        <div id="ui">
+            <h2>Mi Juego 3D</h2>
+            <p>¡Bienvenido a mi juego estilo Roblox!</p>
+            <div id="instructions">
+                <p><strong>Controles:</strong></p>
+                <p>W, A, S, D - Moverse</p>
+                <p>Espacio - Saltar</p>
+                <p>Shift - Correr</p>
+                <p>Ratón - Mirar alrededor</p>
+                <p>ESC - Mostrar/ocultar cursor</p>
             </div>
-            <div id="battleUI">
-                <div id="playerStats">
-                    <div>Kris</div>
-                    <div>HP: <span id="battlePlayerHP">20/20</span></div>
-                    <div>ATK: 5</div>
-                    <div>DEF: 3</div>
-                </div>
-                <div id="battleActions">
-                    <button class="battle-button" onclick="playerAction('fight')">FIGHT</button>
-                    <button class="battle-button" onclick="playerAction('act')">ACT</button>
-                    <button class="battle-button" onclick="playerAction('item')">ITEM</button>
-                    <button class="battle-button" onclick="playerAction('mercy')">MERCY</button>
-                </div>
-                <div id="enemyStats">
-                    <div id="enemyName">Enemigo</div>
-                    <div>HP: <span id="battleEnemyHP">30/30</span></div>
-                    <div>ATK: 4</div>
-                    <div>DEF: 2</div>
-                </div>
-            </div>
+            <button id="fullscreenBtn">Pantalla Completa</button>
         </div>
+        
+        <div id="crosshair"></div>
+        
+        <div id="loading">Cargando juego...</div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.min.js"></script>
     <script>
-        // Configuración del juego
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const dialogueBox = document.getElementById('dialogueBox');
-        const dialogueText = document.getElementById('dialogueText');
-        const playerPos = document.getElementById('playerPos');
-        const playerState = document.getElementById('playerState');
-        const playerHP = document.getElementById('playerHP');
-        const battleScreen = document.getElementById('battleScreen');
-        const battlePlayerHP = document.getElementById('battlePlayerHP');
-        const battleEnemyHP = document.getElementById('battleEnemyHP');
-        const enemyName = document.getElementById('enemyName');
-        const battleText = document.getElementById('battleText');
-        const battleArea = document.getElementById('battleArea');
-
-        // Sprites del jugador (Kris style)
-        class PlayerSprite {
-            constructor() {
-                this.width = 24;
-                this.height = 32;
-                this.frame = 0;
-                this.animationSpeed = 0.2;
-                this.isMoving = false;
-                this.direction = 'down';
-                
-                this.colors = {
-                    skin: '#ffdbac',
-                    hair: '#1a237e',
-                    clothes: '#1a237e',
-                    clothesLight: '#303f9f',
-                    shoes: '#1a237e',
-                    eyes: '#ffffff'
-                };
-            }
+        // Variables globales
+        let scene, camera, renderer, controls;
+        let moveForward = false;
+        let moveBackward = false;
+        let moveLeft = false;
+        let moveRight = false;
+        let canJump = false;
+        let prevTime = performance.now();
+        let velocity = new THREE.Vector3();
+        let direction = new THREE.Vector3();
+        let isLocked = false;
+        
+        // Elementos del DOM
+        const gameContainer = document.getElementById('gameContainer');
+        const loadingElement = document.getElementById('loading');
+        const crosshair = document.getElementById('crosshair');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        
+        // Inicializar el juego
+        function init() {
+            // Crear escena
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB); // Color de cielo azul
+            scene.fog = new THREE.Fog(0x87CEEB, 10, 100);
             
-            draw(x, y, direction, isMoving) {
-                this.direction = direction;
-                this.isMoving = isMoving;
-                
-                if (isMoving) {
-                    this.frame += this.animationSpeed;
-                    if (this.frame >= 4) this.frame = 0;
-                } else {
-                    this.frame = 0;
-                }
-                
-                this.drawKris(x, y);
-            }
+            // Crear cámara
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.y = 10;
             
-            drawKris(x, y) {
-                const frameOffset = Math.floor(this.frame) * 2;
-                
-                // Cuerpo
-                ctx.fillStyle = this.colors.clothes;
-                ctx.fillRect(x, y + 16, this.width, 16);
-                
-                // Piernas
-                ctx.fillStyle = this.colors.clothesLight;
-                if (this.isMoving) {
-                    if (this.direction === 'down' || this.direction === 'up') {
-                        ctx.fillRect(x + 4 + frameOffset, y + 24, 6, 8);
-                        ctx.fillRect(x + 14 - frameOffset, y + 24, 6, 8);
-                    } else {
-                        ctx.fillRect(x + 4, y + 24, 6, 8);
-                        ctx.fillRect(x + 14, y + 24, 6, 8);
-                    }
-                } else {
-                    ctx.fillRect(x + 4, y + 24, 6, 8);
-                    ctx.fillRect(x + 14, y + 24, 6, 8);
-                }
-                
-                // Cabeza
-                ctx.fillStyle = this.colors.skin;
-                ctx.fillRect(x + 4, y + 4, 16, 12);
-                
-                // Cabello
-                ctx.fillStyle = this.colors.hair;
-                ctx.fillRect(x + 2, y + 2, 20, 10);
-                
-                if (this.direction === 'left') {
-                    ctx.fillRect(x - 2, y + 6, 4, 8);
-                } else if (this.direction === 'right') {
-                    ctx.fillRect(x + 22, y + 6, 4, 8);
-                }
-                
-                // Ojos
-                ctx.fillStyle = this.colors.eyes;
-                switch(this.direction) {
-                    case 'down':
-                        ctx.fillRect(x + 8, y + 10, 3, 2);
-                        ctx.fillRect(x + 14, y + 10, 3, 2);
-                        break;
-                    case 'up':
-                        ctx.fillRect(x + 8, y + 8, 3, 2);
-                        ctx.fillRect(x + 14, y + 8, 3, 2);
-                        break;
-                    case 'left':
-                        ctx.fillRect(x + 7, y + 9, 2, 3);
-                        ctx.fillRect(x + 13, y + 9, 2, 3);
-                        break;
-                    case 'right':
-                        ctx.fillRect(x + 9, y + 9, 2, 3);
-                        ctx.fillRect(x + 15, y + 9, 2, 3);
-                        break;
-                }
-                
-                // Brazos
-                ctx.fillStyle = this.colors.skin;
-                if (this.isMoving) {
-                    const armSwing = Math.sin(this.frame * Math.PI) * 2;
-                    if (this.direction === 'left' || this.direction === 'right') {
-                        ctx.fillRect(x - 2 + armSwing, y + 16, 4, 8);
-                        ctx.fillRect(x + 22 - armSwing, y + 16, 4, 8);
-                    } else {
-                        ctx.fillRect(x - 2, y + 16, 4, 6);
-                        ctx.fillRect(x + 22, y + 16, 4, 6);
-                    }
-                } else {
-                    ctx.fillRect(x - 2, y + 16, 4, 6);
-                    ctx.fillRect(x + 22, y + 16, 4, 6);
-                }
-            }
-        }
-
-        // Sistema de batalla
-        class BattleSystem {
-            constructor() {
-                this.isActive = false;
-                this.player = {
-                    hp: 20,
-                    maxHp: 20,
-                    atk: 5,
-                    def: 3
-                };
-                this.enemy = null;
-                this.attacks = [];
-                this.playerHeart = { x: 400, y: 500 };
-                this.turn = 'player';
-            }
+            // Crear renderizador
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            gameContainer.appendChild(renderer.domElement);
             
-            startBattle(enemyType) {
-                this.isActive = true;
-                battleScreen.style.display = 'flex';
-                
-                if (enemyType === 'sans') {
-                    this.enemy = {
-                        name: 'Sans',
-                        hp: 30,
-                        maxHp: 30,
-                        atk: 4,
-                        def: 2,
-                        type: 'sans'
-                    };
-                } else {
-                    this.enemy = {
-                        name: 'Toriel',
-                        hp: 25,
-                        maxHp: 25,
-                        atk: 3,
-                        def: 4,
-                        type: 'toriel'
-                    };
-                }
-                
-                this.updateUI();
-                battleText.textContent = `${this.enemy.name} te desafía a un combate!`;
-                this.attacks = [];
-            }
+            // Configurar controles
+            controls = new THREE.PointerLockControls(camera, document.body);
             
-            updateUI() {
-                battlePlayerHP.textContent = `${this.player.hp}/${this.player.maxHp}`;
-                battleEnemyHP.textContent = `${this.enemy.hp}/${this.enemy.maxHp}`;
-                enemyName.textContent = this.enemy.name;
-                playerHP.textContent = `${this.player.hp}/${this.player.maxHp}`;
-            }
-            
-            playerAction(action) {
-                if (this.turn !== 'player') return;
-                
-                switch(action) {
-                    case 'fight':
-                        this.attack();
-                        break;
-                    case 'act':
-                        this.act();
-                        break;
-                    case 'item':
-                        battleText.textContent = "No tienes items...";
-                        setTimeout(() => this.enemyTurn(), 1500);
-                        break;
-                    case 'mercy':
-                        battleText.textContent = `${this.enemy.name} no acepta tu misericordia...`;
-                        setTimeout(() => this.enemyTurn(), 1500);
-                        break;
-                }
-                this.turn = 'enemy';
-            }
-            
-            attack() {
-                const damage = Math.max(1, this.player.atk - this.enemy.def);
-                this.enemy.hp -= damage;
-                battleText.textContent = `Atacas! ${this.enemy.name} pierde ${damage} HP!`;
-                this.updateUI();
-                
-                if (this.enemy.hp <= 0) {
-                    setTimeout(() => this.endBattle(true), 1000);
-                } else {
-                    setTimeout(() => this.enemyTurn(), 1500);
-                }
-            }
-            
-            act() {
-                if (this.enemy.type === 'sans') {
-                    battleText.textContent = "Le preguntas a Sans sobre su trabajo... Se ríe.";
-                } else {
-                    battleText.textContent = "Le dices a Toriel que huele bien... Se sonroja.";
-                }
-                setTimeout(() => this.enemyTurn(), 1500);
-            }
-            
-            enemyTurn() {
-                this.turn = 'enemy';
-                
-                if (this.enemy.type === 'sans') {
-                    this.sansAttack();
-                } else {
-                    this.torielAttack();
-                }
-                
-                setTimeout(() => {
-                    this.turn = 'player';
-                    battleText.textContent = "¿Qué quieres hacer?";
-                }, 3000);
-            }
-            
-            sansAttack() {
-                battleText.textContent = "Sans usa ATAQUE DE HUESOS!";
-                
-                // Crear huesos
-                for (let i = 0; i < 5; i++) {
-                    setTimeout(() => {
-                        const bone = document.createElement('div');
-                        bone.className = 'attack sans-bone';
-                        bone.style.left = `${Math.random() * 700}px`;
-                        bone.style.top = '0px';
-                        battleArea.appendChild(bone);
-                        
-                        // Animación del hueso
-                        let pos = 0;
-                        const fall = setInterval(() => {
-                            pos += 5;
-                            bone.style.top = `${pos}px`;
-                            
-                            // Detección de colisión
-                            const heartRect = { x: this.playerHeart.x, y: this.playerHeart.y, width: 16, height: 16 };
-                            const boneRect = { x: parseInt(bone.style.left), y: pos, width: 100, height: 20 };
-                            
-                            if (this.checkCollision(heartRect, boneRect)) {
-                                this.player.hp -= 2;
-                                this.updateUI();
-                                bone.remove();
-                                clearInterval(fall);
-                                battleText.textContent = "¡Te golpeó un hueso! -2 HP";
-                            }
-                            
-                            if (pos > 600) {
-                                bone.remove();
-                                clearInterval(fall);
-                            }
-                        }, 50);
-                    }, i * 600);
-                }
-            }
-            
-            torielAttack() {
-                battleText.textContent = "Toriel usa FUEGO MÁGICO!";
-                
-                // Crear bolas de fuego
-                for (let i = 0; i < 3; i++) {
-                    setTimeout(() => {
-                        const fire = document.createElement('div');
-                        fire.className = 'attack toriel-fire';
-                        fire.style.left = `${Math.random() * 700}px`;
-                        fire.style.top = '0px';
-                        battleArea.appendChild(fire);
-                        
-                        // Animación del fuego
-                        let pos = 0;
-                        const fall = setInterval(() => {
-                            pos += 4;
-                            fire.style.top = `${pos}px`;
-                            
-                            // Detección de colisión
-                            const heartRect = { x: this.playerHeart.x, y: this.playerHeart.y, width: 16, height: 16 };
-                            const fireRect = { x: parseInt(fire.style.left), y: pos, width: 30, height: 30 };
-                            
-                            if (this.checkCollision(heartRect, fireRect)) {
-                                this.player.hp -= 3;
-                                this.updateUI();
-                                fire.remove();
-                                clearInterval(fall);
-                                battleText.textContent = "¡Te quemó el fuego! -3 HP";
-                            }
-                            
-                            if (pos > 600) {
-                                fire.remove();
-                                clearInterval(fall);
-                            }
-                        }, 50);
-                    }, i * 800);
-                }
-            }
-            
-            checkCollision(rect1, rect2) {
-                return rect1.x < rect2.x + rect2.width &&
-                       rect1.x + rect1.width > rect2.x &&
-                       rect1.y < rect2.y + rect2.height &&
-                       rect1.y + rect1.height > rect2.y;
-            }
-            
-            endBattle(victory) {
-                this.isActive = false;
-                battleScreen.style.display = 'none';
-                
-                // Limpiar ataques
-                document.querySelectorAll('.attack').forEach(attack => attack.remove());
-                
-                if (victory) {
-                    showDialogue(`¡Has derrotado a ${this.enemy.name}! Ganaste 10 de experiencia.`);
-                } else {
-                    showDialogue("Has sido derrotado... Pero te has curado milagrosamente.");
-                    this.player.hp = this.player.maxHp;
-                    this.updateUI();
-                }
-            }
-        }
-
-        // Jugador
-        const player = {
-            x: 400,
-            y: 300,
-            width: 24,
-            height: 32,
-            speed: 3,
-            direction: 'down',
-            isMoving: false,
-            sprite: new PlayerSprite(),
-            hp: 20,
-            maxHp: 20
-        };
-
-        // NPCs que inician batallas
-        const npcs = [
-            {
-                x: 200,
-                y: 200,
-                width: 20,
-                height: 30,
-                color: '#4ecdc4',
-                name: 'Sans',
-                dialogues: [
-                    "heh, ¿quieres pelear, humano?",
-                    "prepárate para un mal rato...",
-                    "tu determinación me recuerda a alguien..."
-                ],
-                battle: true,
-                enemyType: 'sans'
-            },
-            {
-                x: 600,
-                y: 400,
-                width: 20,
-                height: 30,
-                color: '#ffe66d',
-                name: 'Toriel',
-                dialogues: [
-                    "No deberías estar aquí, pequeño.",
-                    "Debo protegerte, incluso de ti mismo.",
-                    "Por favor, regresa a casa."
-                ],
-                battle: true,
-                enemyType: 'toriel'
-            }
-        ];
-
-        // Sistema de batalla
-        const battleSystem = new BattleSystem();
-
-        // Controles
-        const keys = {};
-        let currentDialogue = null;
-        let dialogueIndex = 0;
-
-        // Event listeners para teclado
-        document.addEventListener('keydown', (e) => {
-            keys[e.key.toLowerCase()] = true;
-            
-            if (e.key === ' ' && dialogueBox.style.display === 'block') {
-                e.preventDefault();
-                nextDialogue();
-            }
-            
-            // Movimiento del corazón en batalla
-            if (battleSystem.isActive) {
-                const heart = battleSystem.playerHeart;
-                const speed = 5;
-                
-                if (keys['arrowleft'] || keys['a']) heart.x = Math.max(50, heart.x - speed);
-                if (keys['arrowright'] || keys['d']) heart.x = Math.min(750, heart.x + speed);
-                if (keys['arrowup'] || keys['w']) heart.y = Math.max(50, heart.y - speed);
-                if (keys['arrowdown'] || keys['s']) heart.y = Math.min(550, heart.y + speed);
-                
-                updateBattleHeart();
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            keys[e.key.toLowerCase()] = false;
-        });
-
-        function updateBattleHeart() {
-            let heart = document.getElementById('playerHeart');
-            if (!heart) {
-                heart = document.createElement('div');
-                heart.id = 'playerHeart';
-                heart.className = 'heart';
-                battleArea.appendChild(heart);
-            }
-            heart.style.left = `${battleSystem.playerHeart.x - 8}px`;
-            heart.style.top = `${battleSystem.playerHeart.y - 8}px`;
-        }
-
-        // Mostrar diálogo
-        function showDialogue(text, name = null) {
-            if (name) {
-                dialogueText.innerHTML = `<span class="npc-name">${name}:</span> ${text}`;
-            } else {
-                dialogueText.innerHTML = text;
-            }
-            dialogueBox.style.display = 'block';
-            currentDialogue = { text, name };
-        }
-
-        function nextDialogue() {
-            dialogueIndex++;
-            if (currentDialogue && currentDialogue.dialogues && dialogueIndex < currentDialogue.dialogues.length) {
-                showDialogue(currentDialogue.dialogues[dialogueIndex], currentDialogue.name);
-            } else {
-                dialogueBox.style.display = 'none';
-                dialogueIndex = 0;
-                currentDialogue = null;
-            }
-        }
-
-        // Interactuar con objetos/NPCs
-        function interact() {
-            if (battleSystem.isActive) return;
-            
-            // Verificar NPCs cercanos
-            for (let npc of npcs) {
-                const interactionRange = 50;
-                const distance = Math.sqrt((player.x - npc.x) ** 2 + (player.y - npc.y) ** 2);
-                
-                if (distance < interactionRange) {
-                    if (npc.battle) {
-                        const randomDialogue = npc.dialogues[Math.floor(Math.random() * npc.dialogues.length)];
-                        showDialogue(randomDialogue, npc.name);
-                        setTimeout(() => {
-                            dialogueBox.style.display = 'none';
-                            battleSystem.startBattle(npc.enemyType);
-                            updateBattleHeart();
-                        }, 2000);
-                    } else {
-                        const randomDialogue = npc.dialogues[Math.floor(Math.random() * npc.dialogues.length)];
-                        showDialogue(randomDialogue, npc.name);
-                        currentDialogue = npc;
-                    }
-                    return;
-                }
-            }
-        }
-
-        // Actualizar posición del jugador
-        function updatePlayer() {
-            if (battleSystem.isActive) return;
-            
-            let moved = false;
-            let newX = player.x;
-            let newY = player.y;
-
-            // Movimiento
-            if (keys['w'] || keys['arrowup']) {
-                newY -= player.speed;
-                player.direction = 'up';
-                moved = true;
-            }
-            if (keys['s'] || keys['arrowdown']) {
-                newY += player.speed;
-                player.direction = 'down';
-                moved = true;
-            }
-            if (keys['a'] || keys['arrowleft']) {
-                newX -= player.speed;
-                player.direction = 'left';
-                moved = true;
-            }
-            if (keys['d'] || keys['arrowright']) {
-                newX += player.speed;
-                player.direction = 'right';
-                moved = true;
-            }
-
-            player.isMoving = moved;
-            playerState.textContent = player.isMoving ? 'Caminando' : 'Parado';
-
-            // Interacción
-            if (keys[' '] && dialogueBox.style.display !== 'block') {
-                interact();
-                keys[' '] = false;
-            }
-
-            // Limites del canvas
-            if (newX >= 0 && newX <= canvas.width - player.width) {
-                player.x = newX;
-            }
-            if (newY >= 0 && newY <= canvas.height - player.height) {
-                player.y = newY;
-            }
-
-            // Actualizar HUD
-            playerPos.textContent = `${Math.floor(player.x)},${Math.floor(player.y)}`;
-            playerHP.textContent = `${player.hp}/${player.maxHp}`;
-        }
-
-        // Dibujar elementos
-        function draw() {
-            if (battleSystem.isActive) return;
-            
-            // Limpiar canvas
-            ctx.fillStyle = '#2d2d44';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Dibujar patrón de fondo
-            ctx.strokeStyle = '#3a3a5a';
-            ctx.lineWidth = 1;
-            for (let x = 0; x < canvas.width; x += 50) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            for (let y = 0; y < canvas.height; y += 50) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
-
-            // Dibujar NPCs
-            npcs.forEach(npc => {
-                ctx.fillStyle = npc.color;
-                ctx.fillRect(npc.x, npc.y, npc.width, npc.height);
-                
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(npc.x + 5, npc.y + 8, 4, 4);
-                ctx.fillRect(npc.x + 11, npc.y + 8, 4, 4);
+            // Eventos de bloqueo de puntero
+            controls.addEventListener('lock', function() {
+                isLocked = true;
+                crosshair.style.display = 'block';
+                document.getElementById('ui').style.display = 'none';
             });
-
-            // Dibujar jugador con sprite
-            player.sprite.draw(player.x, player.y, player.direction, player.isMoving);
-
-            // Dibujar área de interacción
-            if (keys['shift']) {
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.beginPath();
-                ctx.arc(player.x + player.width/2, player.y + player.height/2, 50, 0, Math.PI * 2);
-                ctx.stroke();
+            
+            controls.addEventListener('unlock', function() {
+                isLocked = false;
+                crosshair.style.display = 'none';
+                document.getElementById('ui').style.display = 'block';
+            });
+            
+            // Evento de clic para activar controles
+            gameContainer.addEventListener('click', function() {
+                if (!isLocked) {
+                    controls.lock();
+                }
+            });
+            
+            // Eventos de teclado
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+            
+            // Evento de tecla ESC para mostrar/ocultar cursor
+            document.addEventListener('keydown', function(event) {
+                if (event.code === 'Escape') {
+                    if (isLocked) {
+                        controls.unlock();
+                    }
+                }
+            });
+            
+            // Configurar iluminación
+            const ambientLight = new THREE.AmbientLight(0x606060, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 100, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 500;
+            directionalLight.shadow.camera.left = -100;
+            directionalLight.shadow.camera.right = 100;
+            directionalLight.shadow.camera.top = 100;
+            directionalLight.shadow.camera.bottom = -100;
+            scene.add(directionalLight);
+            
+            // Crear terreno
+            createTerrain();
+            
+            // Crear objetos en el mundo
+            createWorldObjects();
+            
+            // Ocultar pantalla de carga
+            loadingElement.style.display = 'none';
+            
+            // Iniciar bucle de animación
+            animate();
+        }
+        
+        // Crear terreno
+        function createTerrain() {
+            // Suelo
+            const groundGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
+            const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x3a9b3a });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+            
+            // Agregar algunos obstáculos y elementos
+            const cubeGeometry = new THREE.BoxGeometry(5, 10, 5);
+            const cubeMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+            
+            for (let i = 0; i < 10; i++) {
+                const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                cube.position.x = Math.random() * 100 - 50;
+                cube.position.z = Math.random() * 100 - 50;
+                cube.position.y = 5;
+                cube.castShadow = true;
+                scene.add(cube);
+            }
+            
+            // Agregar algunas plataformas
+            const platformGeometry = new THREE.BoxGeometry(15, 1, 15);
+            const platformMaterial = new THREE.MeshLambertMaterial({ color: 0x9932CC });
+            
+            for (let i = 0; i < 5; i++) {
+                const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+                platform.position.x = Math.random() * 80 - 40;
+                platform.position.z = Math.random() * 80 - 40;
+                platform.position.y = 15 + i * 10;
+                platform.castShadow = true;
+                platform.receiveShadow = true;
+                scene.add(platform);
             }
         }
-
-        // Acciones de batalla desde los botones
-        function playerAction(action) {
-            battleSystem.playerAction(action);
+        
+        // Crear objetos en el mundo
+        function createWorldObjects() {
+            // Agregar algunos árboles
+            const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 5, 8);
+            const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+            
+            const leavesGeometry = new THREE.SphereGeometry(3, 8, 6);
+            const leavesMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+            
+            for (let i = 0; i < 20; i++) {
+                const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                trunk.position.x = Math.random() * 150 - 75;
+                trunk.position.z = Math.random() * 150 - 75;
+                trunk.position.y = 2.5;
+                trunk.castShadow = true;
+                scene.add(trunk);
+                
+                const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
+                leaves.position.x = trunk.position.x;
+                leaves.position.z = trunk.position.z;
+                leaves.position.y = 7;
+                leaves.castShadow = true;
+                scene.add(leaves);
+            }
+            
+            // Agregar una casa simple
+            const houseGroup = new THREE.Group();
+            
+            // Base de la casa
+            const houseGeometry = new THREE.BoxGeometry(10, 8, 10);
+            const houseMaterial = new THREE.MeshLambertMaterial({ color: 0xFFD700 });
+            const house = new THREE.Mesh(houseGeometry, houseMaterial);
+            house.position.y = 4;
+            house.castShadow = true;
+            house.receiveShadow = true;
+            houseGroup.add(house);
+            
+            // Techo
+            const roofGeometry = new THREE.ConeGeometry(8, 5, 4);
+            const roofMaterial = new THREE.MeshLambertMaterial({ color: 0x8B0000 });
+            const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+            roof.position.y = 10.5;
+            roof.rotation.y = Math.PI / 4;
+            roof.castShadow = true;
+            houseGroup.add(roof);
+            
+            // Posicionar la casa
+            houseGroup.position.set(20, 0, 20);
+            scene.add(houseGroup);
         }
-
-        // Bucle del juego
-        function gameLoop() {
-            updatePlayer();
-            draw();
-            requestAnimationFrame(gameLoop);
+        
+        // Manejar eventos de teclado
+        function onKeyDown(event) {
+            switch (event.code) {
+                case 'ArrowUp':
+                case 'KeyW':
+                    moveForward = true;
+                    break;
+                    
+                case 'ArrowLeft':
+                case 'KeyA':
+                    moveLeft = true;
+                    break;
+                    
+                case 'ArrowDown':
+                case 'KeyS':
+                    moveBackward = true;
+                    break;
+                    
+                case 'ArrowRight':
+                case 'KeyD':
+                    moveRight = true;
+                    break;
+                    
+                case 'Space':
+                    if (canJump === true) {
+                        velocity.y += 15;
+                    }
+                    canJump = false;
+                    break;
+            }
         }
-
-        // Iniciar juego
-        gameLoop();
-
-        // Mensaje de bienvenida
-        setTimeout(() => {
-            showDialogue("¡Bienvenido! Habla con Sans o Toriel para iniciar una batalla. Usa las flechas para esquivar ataques.", "Sistema");
-        }, 1000);
+        
+        function onKeyUp(event) {
+            switch (event.code) {
+                case 'ArrowUp':
+                case 'KeyW':
+                    moveForward = false;
+                    break;
+                    
+                case 'ArrowLeft':
+                case 'KeyA':
+                    moveLeft = false;
+                    break;
+                    
+                case 'ArrowDown':
+                case 'KeyS':
+                    moveBackward = false;
+                    break;
+                    
+                case 'ArrowRight':
+                case 'KeyD':
+                    moveRight = false;
+                    break;
+            }
+        }
+        
+        // Bucle de animación
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (controls.isLocked === true) {
+                const time = performance.now();
+                const delta = (time - prevTime) / 1000;
+                
+                // Calcular velocidad de movimiento
+                velocity.x -= velocity.x * 10.0 * delta;
+                velocity.z -= velocity.z * 10.0 * delta;
+                velocity.y -= 9.8 * 25.0 * delta; // Gravedad
+                
+                direction.z = Number(moveForward) - Number(moveBackward);
+                direction.x = Number(moveRight) - Number(moveLeft);
+                direction.normalize();
+                
+                if (moveForward || moveBackward) velocity.z -= direction.z * 200.0 * delta;
+                if (moveLeft || moveRight) velocity.x -= direction.x * 200.0 * delta;
+                
+                // Aplicar movimiento
+                controls.moveRight(-velocity.x * delta);
+                controls.moveForward(-velocity.z * delta);
+                
+                // Verificar si está en el suelo
+                if (controls.getObject().position.y < 10) {
+                    velocity.y = 0;
+                    controls.getObject().position.y = 10;
+                    canJump = true;
+                }
+                
+                prevTime = time;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Manejar redimensionado de ventana
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Botón de pantalla completa
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                gameContainer.requestFullscreen().catch(err => {
+                    console.error(`Error al intentar activar pantalla completa: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+        
+        // Inicializar el juego cuando la página cargue
+        window.onload = init;
     </script>
 </body>
 </html>
