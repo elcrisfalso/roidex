@@ -90,6 +90,7 @@
         <div id="hud">
             <div>Posición: <span id="playerPos">0,0</span></div>
             <div>Interactuar: Espacio</div>
+            <div>Estado: <span id="playerState">Parado</span></div>
         </div>
         
         <div id="controls">
@@ -108,19 +109,138 @@
         const dialogueBox = document.getElementById('dialogueBox');
         const dialogueText = document.getElementById('dialogueText');
         const playerPos = document.getElementById('playerPos');
+        const playerState = document.getElementById('playerState');
+
+        // Sprites del jugador (Kris style)
+        class PlayerSprite {
+            constructor() {
+                this.width = 24;
+                this.height = 32;
+                this.frame = 0;
+                this.animationSpeed = 0.2;
+                this.isMoving = false;
+                this.direction = 'down';
+                
+                // Colores estilo Kris (azul oscuro/azul claro)
+                this.colors = {
+                    skin: '#ffdbac',
+                    hair: '#1a237e',
+                    clothes: '#1a237e',
+                    clothesLight: '#303f9f',
+                    shoes: '#1a237e',
+                    eyes: '#ffffff'
+                };
+            }
+            
+            draw(x, y, direction, isMoving) {
+                this.direction = direction;
+                this.isMoving = isMoving;
+                
+                // Actualizar animación si está moviéndose
+                if (isMoving) {
+                    this.frame += this.animationSpeed;
+                    if (this.frame >= 4) this.frame = 0;
+                } else {
+                    this.frame = 0;
+                }
+                
+                this.drawKris(x, y);
+            }
+            
+            drawKris(x, y) {
+                const frameOffset = Math.floor(this.frame) * 2;
+                
+                // Cuerpo (ropaje azul oscuro)
+                ctx.fillStyle = this.colors.clothes;
+                ctx.fillRect(x, y + 16, this.width, 16);
+                
+                // Piernas/pantalón (azul más claro)
+                ctx.fillStyle = this.colors.clothesLight;
+                if (this.isMoving) {
+                    // Animación de caminar para las piernas
+                    if (this.direction === 'down' || this.direction === 'up') {
+                        ctx.fillRect(x + 4 + frameOffset, y + 24, 6, 8);
+                        ctx.fillRect(x + 14 - frameOffset, y + 24, 6, 8);
+                    } else {
+                        ctx.fillRect(x + 4, y + 24, 6, 8);
+                        ctx.fillRect(x + 14, y + 24, 6, 8);
+                    }
+                } else {
+                    ctx.fillRect(x + 4, y + 24, 6, 8);
+                    ctx.fillRect(x + 14, y + 24, 6, 8);
+                }
+                
+                // Cabeza
+                ctx.fillStyle = this.colors.skin;
+                ctx.fillRect(x + 4, y + 4, 16, 12);
+                
+                // Cabello (característico de Kris - azul oscuro cubriendo ojos)
+                ctx.fillStyle = this.colors.hair;
+                ctx.fillRect(x + 2, y + 2, 20, 10);
+                
+                // Detalles del cabello (mechón característico)
+                if (this.direction === 'left') {
+                    ctx.fillRect(x - 2, y + 6, 4, 8);
+                } else if (this.direction === 'right') {
+                    ctx.fillRect(x + 22, y + 6, 4, 8);
+                }
+                
+                // Ojos (solo visibles según dirección)
+                ctx.fillStyle = this.colors.eyes;
+                switch(this.direction) {
+                    case 'down':
+                        // Ojos mirando hacia abajo
+                        ctx.fillRect(x + 8, y + 10, 3, 2);
+                        ctx.fillRect(x + 14, y + 10, 3, 2);
+                        break;
+                    case 'up':
+                        // Ojos mirando hacia arriba
+                        ctx.fillRect(x + 8, y + 8, 3, 2);
+                        ctx.fillRect(x + 14, y + 8, 3, 2);
+                        break;
+                    case 'left':
+                        // Ojos mirando hacia izquierda
+                        ctx.fillRect(x + 7, y + 9, 2, 3);
+                        ctx.fillRect(x + 13, y + 9, 2, 3);
+                        break;
+                    case 'right':
+                        // Ojos mirando hacia derecha
+                        ctx.fillRect(x + 9, y + 9, 2, 3);
+                        ctx.fillRect(x + 15, y + 9, 2, 3);
+                        break;
+                }
+                
+                // Brazos (animados cuando camina)
+                ctx.fillStyle = this.colors.skin;
+                if (this.isMoving) {
+                    const armSwing = Math.sin(this.frame * Math.PI) * 2;
+                    if (this.direction === 'left' || this.direction === 'right') {
+                        ctx.fillRect(x - 2 + armSwing, y + 16, 4, 8);
+                        ctx.fillRect(x + 22 - armSwing, y + 16, 4, 8);
+                    } else {
+                        ctx.fillRect(x - 2, y + 16, 4, 6);
+                        ctx.fillRect(x + 22, y + 16, 4, 6);
+                    }
+                } else {
+                    ctx.fillRect(x - 2, y + 16, 4, 6);
+                    ctx.fillRect(x + 22, y + 16, 4, 6);
+                }
+            }
+        }
 
         // Jugador
         const player = {
             x: 400,
             y: 300,
-            width: 20,
-            height: 30,
+            width: 24,
+            height: 32,
             speed: 3,
-            color: '#ff6b6b',
-            direction: 'down'
+            direction: 'down',
+            isMoving: false,
+            sprite: new PlayerSprite()
         };
 
-        // NPCs
+        // NPCs (simplificados para el ejemplo)
         const npcs = [
             {
                 x: 200,
@@ -147,19 +267,6 @@
                     "Ten cuidado por ahí afuera.",
                     "¿Te gustaría una tarta de caracol?"
                 ]
-            },
-            {
-                x: 300,
-                y: 500,
-                width: 20,
-                height: 30,
-                color: '#95e1d3',
-                name: 'Ralsei',
-                dialogues: [
-                    "¡Hola! Soy Ralsei.",
-                    "Todos los seres de luz son bienvenidos aquí.",
-                    "Juntos podemos salvar el mundo."
-                ]
             }
         ];
 
@@ -184,16 +291,6 @@
                 type: 'sign',
                 name: 'Letrero',
                 message: "Bienvenido al Pueblo de la Luz. ¡Ten cuidado con los NPCs!"
-            },
-            {
-                x: 700,
-                y: 250,
-                width: 25,
-                height: 25,
-                color: '#fd79a8',
-                type: 'flower',
-                name: 'Flor Mágica',
-                message: "Esta flor brilla con energía mágica. Huele muy bien."
             }
         ];
 
@@ -275,6 +372,7 @@
 
         // Actualizar posición del jugador
         function updatePlayer() {
+            let moved = false;
             let newX = player.x;
             let newY = player.y;
 
@@ -282,24 +380,31 @@
             if (keys['w'] || keys['arrowup']) {
                 newY -= player.speed;
                 player.direction = 'up';
+                moved = true;
             }
             if (keys['s'] || keys['arrowdown']) {
                 newY += player.speed;
                 player.direction = 'down';
+                moved = true;
             }
             if (keys['a'] || keys['arrowleft']) {
                 newX -= player.speed;
                 player.direction = 'left';
+                moved = true;
             }
             if (keys['d'] || keys['arrowright']) {
                 newX += player.speed;
                 player.direction = 'right';
+                moved = true;
             }
+
+            player.isMoving = moved;
+            playerState.textContent = player.isMoving ? 'Caminando' : 'Parado';
 
             // Interacción
             if (keys[' '] && dialogueBox.style.display !== 'block') {
                 interact();
-                keys[' '] = false; // Prevenir múltiples interacciones
+                keys[' '] = false;
             }
 
             // Limites del canvas
@@ -347,10 +452,6 @@
                     ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
                     ctx.fillStyle = '#ffffff';
                     ctx.fillRect(obj.x + 5, obj.y + 5, obj.width - 10, 3);
-                } else if (obj.type === 'flower') {
-                    ctx.beginPath();
-                    ctx.arc(obj.x + obj.width/2, obj.y + obj.height/2, obj.width/2, 0, Math.PI * 2);
-                    ctx.fill();
                 }
             });
 
@@ -365,25 +466,8 @@
                 ctx.fillRect(npc.x + 11, npc.y + 8, 4, 4);
             });
 
-            // Dibujar jugador
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // Cara del jugador según dirección
-            ctx.fillStyle = '#ffffff';
-            if (player.direction === 'down') {
-                ctx.fillRect(player.x + 5, player.y + 10, 4, 4);
-                ctx.fillRect(player.x + 11, player.y + 10, 4, 4);
-            } else if (player.direction === 'up') {
-                ctx.fillRect(player.x + 5, player.y + 8, 4, 4);
-                ctx.fillRect(player.x + 11, player.y + 8, 4, 4);
-            } else if (player.direction === 'left') {
-                ctx.fillRect(player.x + 4, player.y + 10, 4, 4);
-                ctx.fillRect(player.x + 10, player.y + 10, 4, 4);
-            } else if (player.direction === 'right') {
-                ctx.fillRect(player.x + 6, player.y + 10, 4, 4);
-                ctx.fillRect(player.x + 12, player.y + 10, 4, 4);
-            }
+            // Dibujar jugador con sprite
+            player.sprite.draw(player.x, player.y, player.direction, player.isMoving);
 
             // Dibujar área de interacción (debug)
             if (keys['shift']) {
@@ -406,7 +490,7 @@
 
         // Mensaje de bienvenida
         setTimeout(() => {
-            showDialogue("¡Bienvenido! Usa WASD/flechas para moverte y ESPACIO para interactuar con NPCs y objetos.", "Sistema");
+            showDialogue("¡Bienvenido! Ahora tienes un sprite animado estilo Kris. Usa WASD/flechas para moverte.", "Sistema");
         }, 1000);
     </script>
 </body>
